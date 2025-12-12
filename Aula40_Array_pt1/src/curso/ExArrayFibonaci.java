@@ -5,6 +5,7 @@ import java.util.Scanner;
 public class ExArrayFibonaci {
 
 	public static void main(String[] args) {
+		System.out.print("Inicio do prog!");
 		Scanner sc = new Scanner(System.in);
 		System.out.print("Digite o valor de N: ");
 		int n = sc.nextInt();
@@ -28,3 +29,4 @@ public class ExArrayFibonaci {
 	}
 
 }
+
