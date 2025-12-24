@@ -1,0 +1,90 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.util.Random;
+
+public class AviatorVisual extends JPanel {
+
+    private double multiplicador = 1.0;
+    private final double velocidade = 0.04;
+    private final double crashPoint;
+    private boolean crashed = false;
+    private boolean cashout = false;
+
+    public AviatorVisual() {
+        Random random = new Random();
+        crashPoint = 1.5 + random.nextDouble() * 6;
+
+        JFrame frame = new JFrame("Aviator ✈️");
+        frame.setSize(800, 500);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.add(this);
+        frame.setVisible(true);
+
+        frame.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER && !crashed) {
+                    cashout = true;
+                }
+            }
+        });
+
+        gameLoop();
+    }
+
+    private void gameLoop() {
+        new Thread(() -> {
+            try {
+                while (!crashed && !cashout) {
+                    Thread.sleep(100);
+                    multiplicador = Math.exp(velocidade * multiplicador);
+
+                    if (multiplicador >= crashPoint) {
+                        crashed = true;
+                    }
+                    repaint();
+                }
+            } catch (InterruptedException ignored) {}
+        }).start();
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        // Fundo
+        g.setColor(Color.BLACK);
+        g.fillRect(0, 0, getWidth(), getHeight());
+
+        // Texto
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+        g.drawString(String.format("Multiplicador: %.2fx", multiplicador), 30, 40);
+        g.drawString("Pressione ENTER para sacar", 30, 70);
+
+        // Linha do gráfico
+        g.setColor(Color.GREEN);
+        int x = (int) (multiplicador * 60);
+        int y = getHeight() - (int) (multiplicador * 40);
+
+        g.drawLine(50, getHeight() - 50, x, y);
+        g.fillOval(x - 5, y - 5, 10, 10);
+
+        // Resultados
+        if (crashed) {
+            g.setColor(Color.RED);
+            g.drawString("💥 CRASH! Você perdeu!", 300, 250);
+        }
+
+        if (cashout) {
+            g.setColor(Color.CYAN);
+            g.drawString(String.format("💰 CASHOUT em %.2fx!", multiplicador), 280, 250);
+        }
+    }
+
+    public static void main(String[] args) {
+        new AviatorVisual();
+    }
+}
